@@ -1,49 +1,72 @@
-<h2 style="text-align:center; color:darkblue;">Create Schedule</h2>
+@extends('layouts.app')
 
-<form action="{{ route('schedule.store') }}" method="POST"
-      style="width:50%; margin:auto; padding:20px;
-             border:1px solid #ccc; border-radius:10px; background:#f8f9fa;">
+@section('title', 'Schedule Body Pickup')
 
-    @csrf
+@section('content')
+<div class="container-fluid px-0">
 
-    <label>Deceased:</label><br>
-    <select name="deceased_id" required style="width:100%; padding:10px;">
-        @foreach($deceaseds as $deceased)
-            <option value="{{ $deceased->id }}">
-                {{ $deceased->full_name }}
-            </option>
-        @endforeach
-    </select>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
 
-    <br><br>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1 text-white">📅 Schedule Body Pickup</h2>
+                    <p class="text-muted mb-0">Record release time, pickup logistics, and burial dates.</p>
+                </div>
+                <a href="{{ route('schedule.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+            </div>
 
-    <label>Pickup Date:</label><br>
-    <input type="date" name="pickup_date" required style="width:100%; padding:10px;">
-    <div class="mb-3">
-    <label>Burial Date</label>
-    <input type="date"
-           name="burial_date"
-           class="form-control"
-           required>
-</div>
+            <div class="card p-4 p-md-5">
+                <form action="{{ route('schedule.store') }}" method="POST">
+                    @csrf
 
-    <br><br>
+                    <div class="mb-3">
+                        <label class="form-label">Select Deceased Person <span class="text-danger">*</span></label>
+                        <select name="deceased_id" class="form-select" required>
+                            <option value="">-- Choose Deceased Record --</option>
+                            @foreach($deceaseds as $deceased)
+                                <option value="{{ $deceased->id }}">
+                                    {{ $deceased->full_name }} ({{ $deceased->identifier ?? 'ID: ' . $deceased->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-    <label>Pickup Time:</label><br>
-    <input type="time" name="pickup_time" required style="width:100%; padding:10px;">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Pickup / Release Date <span class="text-danger">*</span></label>
+                            <input type="date" name="pickup_date" class="form-control" required>
+                        </div>
 
-    <br><br>
+                        <div class="col-md-6">
+                            <label class="form-label">Pickup Time <span class="text-danger">*</span></label>
+                            <input type="time" name="pickup_time" class="form-control" value="09:00" required>
+                        </div>
+                    </div>
 
-    <label>Notes:</label><br>
-    <textarea name="notes" style="width:100%; padding:10px;"></textarea>
+                    <div class="mb-3">
+                        <label class="form-label">Burial Date</label>
+                        <input type="date" name="burial_date" class="form-control">
+                    </div>
 
-    <br><br>
+                    <div class="mb-4">
+                        <label class="form-label">Special Notes & Family Instructions</label>
+                        <textarea name="notes" rows="3" class="form-control" placeholder="e.g. Casket delivery, hearse arrangements, family representative contact..."></textarea>
+                    </div>
 
-    <div style="text-align:center;">
-        <button type="submit"
-            style="background:green; color:white; padding:12px 25px;
-                   border:none; border-radius:8px;">
-            Submit Schedule
-        </button>
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ route('schedule.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-calendar-check me-1"></i> Save Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
     </div>
-</form>
+
+</div>
+@endsection

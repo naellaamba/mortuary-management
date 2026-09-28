@@ -37,9 +37,10 @@ return [
     'google' => [
     'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
 ],
-'gemini' => [
-    'api_key' => env('GEMINI_API_KEY'),
-],
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.7-flash'),
+    ],
    'campay' => [
 
     'base_url' => env(

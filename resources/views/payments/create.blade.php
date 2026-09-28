@@ -1,169 +1,140 @@
-<h2 style="text-align:center; color:darkblue;">Create New Payment</h2>
+@extends('layouts.app')
 
-<form action="{{ route('payments.store') }}" method="POST"
-      style="width:50%; margin:auto; padding:20px; border:1px solid #ccc; border-radius:10px; background:#f8f9fa;">
+@section('title', 'Make Payment')
 
-    @csrf
-    <div class="mb-3">
-    <label for="payment_method" class="form-label">
-        Payment Method
-    </label>
+@section('content')
+<div class="container-fluid px-0">
 
-   <div class="mb-3">
-    <label class="form-label">
-        Payment Method
-    </label>
+    <div class="row justify-content-center">
+        <div class="col-xl-8">
 
-    <select
-        name="payment_method"
-        id="payment_method"
-        class="form-select"
-        required
-    >
-        <option value="">Select payment method</option>
-        <option value="mobile_money">Mobile Money</option>
-    </select>
-</div>
-<div
-    class="mb-3"
-    id="mobile-money-section"
-    style="display: none;"
->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1 text-white">💳 Record / Process Payment</h2>
+                    <p class="text-muted mb-0">Record cash receipts or process instant CamPay Mobile Money transactions.</p>
+                </div>
+                <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to History
+                </a>
+            </div>
 
-    <label class="form-label">
-        Mobile Money Network
-    </label>
+            <div class="card p-4 p-md-5">
+                <form action="{{ route('payments.store') }}" method="POST">
+                    @csrf
 
-    <select
-        name="mobile_operator"
-        id="mobile_operator"
-        class="form-select"
-    >
+                    {{-- Deceased Selection --}}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Deceased Record <span class="text-danger">*</span></label>
+                        <select name="deceased_id" class="form-select" required>
+                            <option value="">-- Choose Deceased Person --</option>
+                            @foreach($deceaseds as $deceased)
+                                <option value="{{ $deceased->id }}">
+                                    {{ $deceased->full_name }} ({{ $deceased->identifier ?? 'ID: ' . $deceased->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-        <option value="">
-            Select network
-        </option>
+                    {{-- Amount & Date --}}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Amount (FCFA) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-muted">FCFA</span>
+                                <input type="number" name="amount" class="form-control" placeholder="e.g. 50000" min="100" required>
+                            </div>
+                        </div>
 
-        <option value="MTN">
-            MTN Mobile Money
-        </option>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Payment Date <span class="text-danger">*</span></label>
+                            <input type="date" name="payment_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </div>
 
-        <option value="ORANGE">
-            Orange Money
-        </option>
+                    {{-- Payment Method Selection --}}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Payment Method <span class="text-danger">*</span></label>
+                        <select name="payment_method" id="payment_method" class="form-select" required>
+                            <option value="mobile_money">CamPay Mobile Money (MTN / Orange)</option>
+                            <option value="cash">Cash Payment</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                        </select>
+                    </div>
 
-    </select>
+                    {{-- Mobile Money Sub-fields --}}
+                    <div id="mobile-money-section" class="p-3 rounded-3 mb-4" style="background: rgba(59, 130, 246, 0.08); border: 1px dashed rgba(59, 130, 246, 0.3);">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Mobile Money Network</label>
+                                <select name="mobile_operator" id="mobile_operator" class="form-select">
+                                    <option value="MTN">MTN Mobile Money</option>
+                                    <option value="ORANGE">Orange Money</option>
+                                </select>
+                            </div>
 
-</div>
-<div
-    class="mb-3"
-    id="phone-section"
-    style="display: none;"
->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Payer Phone Number</label>
+                                <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="e.g. 677123456">
+                                <small class="text-muted">Enter the Cameroon phone number to receive payment prompt.</small>
+                            </div>
+                        </div>
+                    </div>
 
-    <label class="form-label">
-        Mobile Money Phone Number
-    </label>
+                    {{-- Balance --}}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Remaining Balance (FCFA)</label>
+                            <input type="number" name="balance" class="form-control" value="0" min="0">
+                        </div>
 
-    <input
-        type="text"
-        name="phone_number"
-        id="phone_number"
-        class="form-control"
-        placeholder="Example: 677123456"
-    >
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid / Confirmed</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <small class="text-muted">
-        Enter the MTN or Orange number that will authorize the payment.
-    </small>
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top border-secondary border-opacity-25">
+                        <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success px-4 py-2 fw-semibold">
+                            <i class="bi bi-credit-card me-1"></i> Submit Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-</div>
-
-</div>
-
-    <label>Deceased:</label><br>
-    <select name="deceased_id" required style="width:100%; padding:10px;">
-        @foreach($deceaseds as $deceased)
-            <option value="{{ $deceased->id }}">
-                {{ $deceased->full_name }}
-            </option>
-        @endforeach
-    </select>
-
-    <br><br>
-
-    <label>Amount:</label><br>
-    <input type="number" name="amount" required style="width:100%; padding:10px;">
-
-    <br><br>
-
-    <label>Payment Date:</label><br>
-    <input type="date" name="payment_date" required style="width:100%; padding:10px;">
-
-    <br><br>
-
-    <label>Balance:</label><br>
-    <input type="number" name="balance" required style="width:100%; padding:10px;">
-
-    <br><br>
-
-    <label>Status:</label><br>
-    <select name="status" style="width:100%; padding:10px;">
-        <option value="paid">Paid</option>
-        <option value="pending">Pending</option>
-    </select>
-
-    <br><br>
-
-    <div style="text-align:center;">
-        <button type="submit"
-            style="background:green; color:white; padding:12px 30px; border:none; border-radius:8px; font-size:16px;">
-            Submit Payment
-        </button>
+        </div>
     </div>
-</form>
+
+</div>
+
+@push('scripts')
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
+    const paymentMethod = document.getElementById('payment_method');
+    const mobileMoneySection = document.getElementById('mobile-money-section');
+    const mobileOperator = document.getElementById('mobile_operator');
+    const phoneNumber = document.getElementById('phone_number');
 
-    const paymentMethod =
-        document.getElementById('payment_method');
-
-    const mobileMoneySection =
-        document.getElementById('mobile-money-section');
-
-    const phoneSection =
-        document.getElementById('phone-section');
-
-    const mobileOperator =
-        document.getElementById('mobile_operator');
-
-    const phoneNumber =
-        document.getElementById('phone_number');
-
-
-    paymentMethod.addEventListener('change', function () {
-
-        if (this.value === 'mobile_money') {
-
+    function toggleMobileMoney() {
+        if (paymentMethod.value === 'mobile_money') {
             mobileMoneySection.style.display = 'block';
-            phoneSection.style.display = 'block';
-
             mobileOperator.required = true;
             phoneNumber.required = true;
-
         } else {
-
             mobileMoneySection.style.display = 'none';
-            phoneSection.style.display = 'none';
-
             mobileOperator.required = false;
             phoneNumber.required = false;
-
         }
+    }
 
-    });
-
+    paymentMethod.addEventListener('change', toggleMobileMoney);
+    toggleMobileMoney();
 });
-
 </script>
+@endpush
+@endsection

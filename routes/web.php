@@ -205,16 +205,15 @@ Route::post('/geolocation/search', [GeolocationController::class, 'search'])
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| Staff Dashboard
-|--------------------------------------------------------------------------
-*/
-
 Route::get(
     '/staff-dashboard',
     function () {
-        return view('staff.dashboard');
+        $user = auth()->user();
+        $totalDeceased = \App\Models\Deceased::where('user_id', $user->id)->count();
+        $myPayments = \App\Models\Payment::where('user_id', $user->id)->get();
+        $totalSchedules = \App\Models\Schedule::count();
+        $availableRooms = \App\Models\StorageRoom::where('status', 'available')->count();
+        return view('staff.dashboard', compact('totalDeceased', 'myPayments', 'totalSchedules', 'availableRooms'));
     }
 )->middleware(['auth'])->name('staff.dashboard');
 
@@ -261,13 +260,16 @@ Route::post(
 |--------------------------------------------------------------------------
 */
 
-Route::get('/faire-part/{id}', [FairePartController::class, 'generate'])
-    ->name('faire-part.generate');
-    
 Route::get('/faire-part', [FairePartController::class, 'create'])
     ->name('faire-part.create');
 
 Route::post('/faire-part/generate', [FairePartController::class, 'generate'])
     ->name('faire-part.generate');
+
+Route::get('/faire-part/notice/{notice}', [FairePartController::class, 'showNotice'])
+    ->name('faire-part.show');
+
+Route::get('/faire-part/notice/{notice}/pdf', [FairePartController::class, 'downloadPdf'])
+    ->name('faire-part.pdf');
 
 require __DIR__.'/auth.php';

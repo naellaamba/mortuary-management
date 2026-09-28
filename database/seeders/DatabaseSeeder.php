@@ -14,9 +14,10 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-{
-    $this->call([
-        MortuarySeeder::class,
-    ]);
-}
+    {
+        $this->call([
+            UserSeeder::class,
+            MortuarySeeder::class,
+        ]);
+    }
 }
